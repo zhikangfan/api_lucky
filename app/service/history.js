@@ -8,7 +8,7 @@ class HistoryService extends Service {
       const filePath = this.ctx.app.config.historyDataPath;
       if (!fs.existsSync(filePath)) {
         fs.writeFileSync(filePath, JSON.stringify([]), 'utf8');
-        resolve({});
+        resolve([]);
       }
       fs.readFile(filePath, (err, data) => {
         if (err) {
@@ -24,14 +24,10 @@ class HistoryService extends Service {
   async addHistory({ uid, prizeId, name }) {
     return new Promise((resolve, reject) => {
       const filePath = this.ctx.app.config.historyDataPath;
-      const historyInfo = { uid, prizeId, name, status: false, hid: uuidv4() };
+      const historyInfo = { uid, prizeId, name, status: false, writeOffOperatorUid: null, hid: uuidv4() };
       if (!fs.existsSync(filePath)) {
-        fs.writeFile(filePath, JSON.stringify([ historyInfo ]), 'utf8', err => {
-          if (err) {
-            reject(err);
-          }
-          resolve(historyInfo);
-        });
+        fs.writeFileSync(filePath, JSON.stringify([ historyInfo ]), 'utf8');
+        return historyInfo;
       }
       fs.readFile(filePath, (err, data) => {
         if (err) {
@@ -65,6 +61,24 @@ class HistoryService extends Service {
           }
           resolve();
         });
+      });
+    });
+  }
+
+  async findHistory(hid) {
+    return new Promise((resolve, reject) => {
+      const filePath = this.ctx.app.config.historyDataPath;
+      if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, JSON.stringify([]), 'utf8');
+        resolve({});
+      }
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          reject(err);
+        }
+        const d = JSON.parse(data.toString());
+        const historyInfo = d.find(history => history.hid === hid);
+        resolve(historyInfo);
       });
     });
   }

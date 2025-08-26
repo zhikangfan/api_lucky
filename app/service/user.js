@@ -44,7 +44,7 @@ class UserService extends Service {
       const filePath = this.ctx.app.config.userDataPath;
       const userInfo = { nickname, account, password, uid: uuidv4(), count: 0 };
       if (!fs.existsSync(filePath)) {
-        fs.writeFile(filePath, JSON.stringify([ userInfo ]), 'utf8', err => {
+        fs.writeFileSync(filePath, JSON.stringify([ userInfo ]), 'utf8', err => {
           if (err) {
             reject(err);
           }
