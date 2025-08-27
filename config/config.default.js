@@ -33,14 +33,15 @@ module.exports = appInfo => {
   };
   // 配置跨域允许访问的IP地址
   config.cors = {
-    origin(ctx) { // 设置允许来自指定域名请求
-      const whiteList = [ 'http://www.baidu.com', 'http://www.hqyj.com' ];
-      const url = ctx.request.header.origin;
-      if (whiteList.includes(url)) {
-        return url;
-      }
-      return 'http://localhost:5173'; // 默认允许本地请求可跨域
-    },
+    // origin(ctx) { // 设置允许来自指定域名请求
+    //   const whiteList = [ 'http://10.30.8.67:5173', 'http://www.hqyj.com' ];
+    //   const url = ctx.request.header.origin;
+    //   if (whiteList.includes(url)) {
+    //     return url;
+    //   }
+    //   return 'http://localhost:5173'; // 默认允许本地请求可跨域
+    // },
+    origin: '*',
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
     credentials: true, // 允许跨域请求携带cookies
   };
