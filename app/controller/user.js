@@ -36,8 +36,7 @@ class UserController extends Controller {
         .digest('hex');
       // 查找用户
       const user = await ctx.service.user.findUserByAccount(account);
-
-      if (!user || user.password !== hashedPassword) {
+      if (!user || user.dataValues.password !== hashedPassword) {
         this.fail({
           code: 400,
           msg: '账号或密码错误',
@@ -45,8 +44,8 @@ class UserController extends Controller {
         return;
       }
       // 设置session
-      ctx.session.userId = user.uid;
-      const { password: pwd, ...info } = user;
+      ctx.session.userId = user.dataValues.id;
+      const { password: pwd, ...info } = user.dataValues;
       this.success(info);
     } catch (e) {
       this.fail('登录失败');
@@ -56,15 +55,14 @@ class UserController extends Controller {
   async getProfile() {
     const { ctx } = this;
     const target = await ctx.service.user.findUser(ctx.session.userId);
-    if (!target || !target.uid) {
+    if (!target) {
       this.fail({
         code: 400,
         msg: '用户不存在',
       });
       return;
     }
-    const { password, ...info } = target;
-    this.success(info);
+    this.success(target.dataValues);
   }
 
   async register() {
@@ -72,7 +70,7 @@ class UserController extends Controller {
       const { ctx } = this;
       const { account } = this.ctx.request.body;
       const target = await ctx.service.user.findUserByAccount(account);
-      if (!target || !target.uid) {
+      if (!target) {
         const { nickname, password, account } = this.ctx.request.body;
         const hashedPassword = crypto.createHash('sha256')
           .update(password)
@@ -82,7 +80,7 @@ class UserController extends Controller {
           account,
           password: hashedPassword,
         });
-        const { password: pwd, ...info } = result;
+        const { password: pwd, ...info } = result.dataValues;
         this.success(info);
       } else {
         this.fail({
@@ -109,10 +107,9 @@ class UserController extends Controller {
         return;
       }
       if (this.ctx.request.body.password) {
-        const hashedPassword = crypto.createHash('sha256')
+        this.ctx.request.body.password = crypto.createHash('sha256')
           .update(this.ctx.request.body.password)
           .digest('hex');
-        this.ctx.request.body.password = hashedPassword;
       } else {
         delete this.ctx.request.body.password;
       }
@@ -142,7 +139,7 @@ class UserController extends Controller {
         });
         return;
       }
-      await ctx.service.user.removeUser(target.uid);
+      await ctx.service.user.removeUser(uid);
       this.success();
     } catch (e) {
       this.fail('删除用户失败');

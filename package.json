@@ -9,7 +9,12 @@
   "dependencies": {
     "egg": "^3.17.5",
     "egg-cors": "^3.0.1",
+    "egg-logger": "^3.6.1",
+    "egg-redis": "^2.6.1",
     "egg-scripts": "2",
+    "egg-sequelize": "^6.0.0",
+    "egg-validate": "^2.0.2",
+    "mysql2": "^3.14.3",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

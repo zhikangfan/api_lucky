@@ -20,7 +20,7 @@ class PrizeController extends Controller {
     const { service } = this;
     try {
       const data = await service.prize.getAll();
-      this.success(data);
+      this.success(data.dataValues);
     } catch (e) {
       this.fail('查询失败');
     }
@@ -35,7 +35,7 @@ class PrizeController extends Controller {
         this.fail('该奖品不存在');
       } else {
         const data = await service.prize.updatePrize(pid, others);
-        this.success(data);
+        this.success(data.dataValues);
       }
     } catch (e) {
       this.fail('更新失败');
@@ -49,7 +49,7 @@ class PrizeController extends Controller {
       const target = await service.prize.findPrizeByName(name);
       if (!target) {
         const data = await service.prize.addPrize({ chance, name, desc });
-        this.success(data);
+        this.success(data.dataValues);
       } else {
         this.fail('该奖品已存在');
       }
@@ -67,7 +67,7 @@ class PrizeController extends Controller {
         this.fail('该奖品不存在');
       } else {
         const data = await service.prize.removePrize(pid);
-        this.success(data);
+        this.success(data.dataValues);
       }
     } catch (e) {
       this.fail('删除失败');

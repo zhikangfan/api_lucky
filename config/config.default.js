@@ -52,6 +52,15 @@ module.exports = appInfo => {
     httpOnly: true,
     encrypt: true,
   };
+  // 数据库配置
+  config.sequelize = {
+    dialect: 'mysql',
+    host: '47.101.31.109',
+    port: 3306,
+    database: 'lucky',
+    username: 'zhikang',
+    password: 'P@ssw0rd@2025',
+  };
   return {
     ...config,
     ...userConfig,
