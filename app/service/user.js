@@ -42,7 +42,7 @@ class UserService extends Service {
   async registerUser({ nickname, account, password }) {
     return new Promise((resolve, reject) => {
       const filePath = this.ctx.app.config.userDataPath;
-      const userInfo = { nickname, account, password, uid: uuidv4(), count: 0 };
+      const userInfo = { nickname, account, password, uid: uuidv4(), count: 0, createAt: new Date().getTime(), updateAt: new Date().getTime() };
       if (!fs.existsSync(filePath)) {
         fs.writeFileSync(filePath, JSON.stringify([ userInfo ]), 'utf8', err => {
           if (err) {

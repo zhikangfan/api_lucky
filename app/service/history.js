@@ -24,7 +24,7 @@ class HistoryService extends Service {
   async addHistory({ uid, prizeId, name }) {
     return new Promise((resolve, reject) => {
       const filePath = this.ctx.app.config.historyDataPath;
-      const historyInfo = { uid, prizeId, name, status: false, writeOffOperatorUid: null, hid: uuidv4() };
+      const historyInfo = { uid, prizeId, name, status: false, writeOffOperatorUid: null, hid: uuidv4(), createAt: new Date().getTime(), updateAt: new Date().getTime() };
       if (!fs.existsSync(filePath)) {
         fs.writeFileSync(filePath, JSON.stringify([ historyInfo ]), 'utf8');
         return historyInfo;

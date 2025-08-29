@@ -1,18 +1,1 @@
-[
-  {
-    "uid": "916bd1b6-9bda-4842-b92d-1d37c4bd4d57",
-    "prizeId": "31992f4b-ee23-477d-aaad-e50f5c98aa78",
-    "name": "万能卡",
-    "status": true,
-    "writeOffOperatorUid": "916bd1b6-9bda-4842-b92d-1d37c4bd4d57",
-    "hid": "f4a3fe9b-f1e4-4581-9fe2-5d16c43bd220"
-  },
-  {
-    "uid": "916bd1b6-9bda-4842-b92d-1d37c4bd4d57",
-    "prizeId": "31992f4b-ee23-477d-aaad-e50f5c98aa78",
-    "name": "万能卡",
-    "status": false,
-    "writeOffOperatorUid": null,
-    "hid": "3cb91cab-b95c-4fcd-920c-635d9a01a2ba"
-  }
-]
+[{"uid":"916bd1b6-9bda-4842-b92d-1d37c4bd4d57","prizeId":"0134fe82-c26c-4999-ab5d-f19ae9709d0e","name":"转移卡","status":false,"writeOffOperatorUid":null,"hid":"6af13f42-37ec-4572-8d3b-e65807b60f69","createAt":1756391859903,"updateAt":1756391859903}]

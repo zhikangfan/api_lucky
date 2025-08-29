@@ -20,7 +20,18 @@ class HistoryController extends Controller {
       const { ctx } = this;
       const uid = ctx.session.userId;
       const list = await ctx.service.history.getHistoryList(uid);
-      this.success(list);
+      const task = list.map(history => ctx.service.prize.findPrizeByPid(history.prizeId));
+      const taskInfo = await Promise.allSettled(task);
+      // console.log(prizeInfoArray,'-')
+      const data = list.map(history => {
+        const prize = taskInfo.find(task => task.value.pid === history.prizeId);
+        return {
+          ...history,
+          prize: prize.value,
+        };
+      });
+
+      this.success(data);
     } catch (e) {
       this.fail('获取历史记录失败');
     }
@@ -44,7 +55,7 @@ class HistoryController extends Controller {
       this.success();
     } catch (e) {
 
-      console.log(e)
+      console.log(e);
       this.fail({
         msg: '添加历史记录失败',
       });

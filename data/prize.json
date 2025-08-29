@@ -1,1 +1,44 @@
-[{"chance":2,"name":"万能卡","desc":"兑换一切卡片","pid":"31992f4b-ee23-477d-aaad-e50f5c98aa78"},{"chance":14,"name":"消消卡","desc":"消除生气","pid":"1fbdc927-c91d-4285-8553-e5af386dc1ee"},{"chance":8,"name":"大王卡","desc":"听从一切安排，服务使用者有效期24小时","pid":"204e73d7-a2fe-4153-b167-89d19be57129"},{"chance":35,"name":"空空卡","desc":"什么都没有","pid":"5fb9a3bf-cc91-42cb-83d8-69149ed753b3"},{"chance":35,"name":"转移卡","desc":"让另一方再次抽取","pid":"0134fe82-c26c-4999-ab5d-f19ae9709d0e"},{"chance":6,"name":"听话卡","desc":"让对方乖乖听话，对方不得反抗，有效期24小时","pid":"54cd81a7-2bce-4448-9530-bee2bbdf0b06"}]
+[
+  {
+    "chance": 2,
+    "name": "万能卡",
+    "desc": "兑换一切卡片",
+    "expires": 0,
+    "pid": "31992f4b-ee23-477d-aaad-e50f5c98aa78"
+  },
+  {
+    "chance": 14,
+    "name": "消消卡",
+    "desc": "消除生气",
+    "expires": 0,
+    "pid": "1fbdc927-c91d-4285-8553-e5af386dc1ee"
+  },
+  {
+    "chance": 8,
+    "name": "大王卡",
+    "expires": 0,
+    "desc": "听从一切安排，服务使用者有效期24小时",
+    "pid": "204e73d7-a2fe-4153-b167-89d19be57129"
+  },
+  {
+    "chance": 35,
+    "name": "空空卡",
+    "desc": "什么都没有",
+    "expires": 0,
+    "pid": "5fb9a3bf-cc91-42cb-83d8-69149ed753b3"
+  },
+  {
+    "chance": 35,
+    "name": "转移卡",
+    "desc": "让另一方再次抽取",
+    "expires": 0,
+    "pid": "0134fe82-c26c-4999-ab5d-f19ae9709d0e"
+  },
+  {
+    "chance": 6,
+    "name": "听话卡",
+    "desc": "让对方乖乖听话，对方不得反抗，有效期24小时",
+    "expires": 0,
+    "pid": "54cd81a7-2bce-4448-9530-bee2bbdf0b06"
+  }
+]

@@ -20,10 +20,10 @@ class PrizeService extends Service {
     });
   }
 
-  async addPrize({ chance, name, desc }) {
+  async addPrize({ chance, name, desc, expires = 0 }) {
     return new Promise((resolve, reject) => {
       const filePath = this.ctx.app.config.prizeDataPath;
-      const prizeInfo = { chance, name, desc, pid: uuidv4() };
+      const prizeInfo = { chance, name, desc, pid: uuidv4(), expires, createAt: new Date().getTime(), updateAt: new Date().getTime() };
       if (!fs.existsSync(filePath)) {
         fs.writeFile(filePath, JSON.stringify([ { ...prizeInfo } ]), 'utf8', err => {
           if (err) {

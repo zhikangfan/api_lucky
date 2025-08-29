@@ -34,7 +34,7 @@ module.exports = appInfo => {
   // 配置跨域允许访问的IP地址
   config.cors = {
     // origin(ctx) { // 设置允许来自指定域名请求
-    //   const whiteList = [ 'http://10.30.8.67:5173', 'http://www.hqyj.com' ];
+    //   const whiteList = [ 'http://10.30.8.67:5173', 'http://192.168.31.11:5173' ];
     //   const url = ctx.request.header.origin;
     //   if (whiteList.includes(url)) {
     //     return url;
