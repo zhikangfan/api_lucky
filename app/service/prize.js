@@ -1,8 +1,27 @@
 const Service = require('egg').Service;
 
 class PrizeService extends Service {
-  async getAll() {
-    return this.ctx.model.Prize.findAll();
+
+  async getAll(userId, bindUserId) {
+    const Op = this.app.Sequelize.Op;
+    return this.ctx.model.Prize.findAll({
+      where: {
+        [Op.and]: [
+          { status: true },
+          {
+            [Op.or]: [{ creator_id: userId }, { creator_id: bindUserId || null }],
+          },
+        ],
+
+      },
+      include: [
+        {
+          model: this.ctx.model.User,
+          as: 'creator',
+          attributes: [ 'id', 'nickname', 'account' ],
+        },
+      ],
+    });
   }
 
   async addPrize(params) {

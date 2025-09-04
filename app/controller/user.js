@@ -145,6 +145,66 @@ class UserController extends Controller {
       this.fail('删除用户失败');
     }
   }
+
+  async bind() {
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const { bindUserId } = this.ctx.request.body;
+      const origin = await ctx.service.user.findUser(uid);
+      if (origin.companion) {
+        this.fail({
+          code: 400,
+          msg: '账号已绑定其它账号',
+        });
+        return;
+      }
+      const target = await ctx.service.user.findUser(bindUserId);
+      if (!target) {
+        this.fail({
+          code: 400,
+          msg: '用户不存在',
+        });
+        return;
+      }
+      if (target.companion) {
+        this.fail({
+          code: 400,
+          msg: '该用户已被绑定',
+        });
+        return;
+      }
+      if (uid === bindUserId) {
+        this.fail({
+          code: 400,
+          msg: '无法绑定自己账号',
+        });
+        return;
+      }
+      await ctx.service.user.bindUser(uid, bindUserId);
+      this.success();
+    } catch (e) {
+      this.fail('绑定失败');
+    }
+  }
+  async unbind() {
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const origin = await ctx.service.user.findUser(uid);
+      if (!origin.companion) {
+        this.fail({
+          code: 400,
+          msg: '账号未绑定其它账号',
+        });
+        return;
+      }
+      await ctx.service.user.unbindUser(uid, origin.companion);
+      this.success();
+    } catch (e) {
+      this.fail('解除绑定失败');
+    }
+  }
 }
 
 module.exports = UserController;

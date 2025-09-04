@@ -29,12 +29,13 @@ class HistoryController extends Controller {
     try {
       const { ctx } = this;
       const uid = ctx.session.userId;
-      const { prizeId, name } = ctx.request.body;
+      const { prizeId } = ctx.request.body;
       const target = await ctx.service.prize.findPrizeByPid(prizeId);
       if (!target) {
         this.fail({
           msg: '该奖品不存在',
         });
+        return;
       }
       await ctx.service.history.addHistory({
         uid,
@@ -56,14 +57,30 @@ class HistoryController extends Controller {
       if (!target) {
         this.fail({
           code: 400,
-          msg: '历史记录不存在',
+          msg: '无效卡',
         });
         return;
       }
-      if (target.dataValues.write_off) {
+      if (target.write_off) {
         this.fail({
           code: 400,
           msg: '已核销',
+        });
+        return;
+      }
+      const userInfo = await ctx.service.user.findUser(uid);
+      if (userInfo.id === target.user_id) {
+        this.fail({
+          code: 400,
+          msg: '自己无法核销',
+        });
+        return;
+      }
+      // 如果核销者与绑定人有关系，则可以核销
+      if (userInfo.companion !== target.user_id) {
+        this.fail({
+          code: 400,
+          msg: '非绑定关系无法核销',
         });
         return;
       }

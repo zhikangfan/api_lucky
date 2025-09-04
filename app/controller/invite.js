@@ -15,54 +15,86 @@ class InviteController extends Controller {
       msg,
     };
   }
+
+  /**
+   * 生成邀请链接
+   * @return {Promise<void>}
+   */
   async generateInvitationLink() {
-    const { ctx } = this;
-    const uid = ctx.session.userId;
-    const { type = 0, expires = 5 * 60 } = ctx.request.body;
-    const res = await this.ctx.service.invite.addInviteLink({
-      inviter: uid,
-      type,
-      expires,
-    });
-    const link = `${ctx.app.config.preInvitationLink}?inviter=${uid}&type=${res.type}&qid=${res.id}`;
-    this.success({
-      qid: res.id,
-      src: link,
-    });
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const type = ctx.request.query.type || 0;
+      const expires = ctx.request.query.expires || 5 * 60;
+      const key = await this.ctx.service.invite.addInviteLink({
+        inviter: uid,
+        type,
+        expires,
+      });
+      const link = `${ctx.app.config.preInvitationLink}?inviter=${uid}&type=${type}&qid=${key}`;
+      this.success({
+        qid: key,
+        src: link,
+      });
+    } catch (e) {
+      console.log(e);
+      this.fail({
+        msg: '生成失败',
+      });
+    }
+
   }
+
+  /**
+   * 核销
+   * @return {Promise<void>}
+   */
   async writeOff() {
     const { ctx } = this;
     const uid = ctx.session.userId;
-    const { pid, inviter } = ctx.request.body;
-    const target = await this.ctx.service.invite.findInviteLink(pid);
-    console.log(target);
+    const { qid, inviter } = ctx.request.body;
+    const target = await this.ctx.service.invite.findInviteLink(qid);
     if (!target) {
       this.fail({
         msg: '该链接不存在',
       });
       return;
     }
-    if (target.status) {
+    const user = await this.ctx.service.user.findUser(inviter);
+    if (!user) {
       this.fail({
-        msg: '该链接已被使用',
+        msg: '该用户不存在',
       });
       return;
     }
-    if (new Date(target.createAt).getTime() / 1000 > target.expires) {
+    if (user.companion !== uid) {
       this.fail({
-        msg: '该链接已过期',
+        msg: '非绑定用户禁止核销',
       });
       return;
     }
-    // TODO: 校验2人是否绑定
-    await this.ctx.service.invite.dropInviteLink(pid);
+    await this.ctx.service.invite.dropInviteLink(qid);
     this.success();
   }
 
   async check() {
     const { ctx } = this;
     const { qid } = ctx.request.query;
-    return await this.ctx.service.invite.findInviteLink(qid);
+    if (!qid) {
+      this.fail({
+        code: 400,
+        msg: '请传入qid',
+      });
+    }
+    const res = await this.ctx.service.invite.findInviteLink(qid);
+    if (!res) {
+      this.fail({
+        code: 400,
+        msg: '该链接不存在',
+      });
+      return;
+    }
+    this.success(JSON.parse(res));
   }
 }
 module.exports = InviteController;

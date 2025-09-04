@@ -1,7 +1,7 @@
 module.exports = app => {
-  const { STRING, DATE, INTEGER, BOOLEAN } = app.Sequelize;
+  const { STRING, INTEGER, BOOLEAN } = app.Sequelize;
 
-  return app.model.define('prize', {
+  const Prize = app.model.define('prize', {
     id: {
       type: INTEGER,
       autoIncrement: true,
@@ -43,13 +43,25 @@ module.exports = app => {
       defaultValue: true,
       comment: '奖品状态，true: 可用; false: 不可用',
     },
-    created_at: {
-      type: DATE,
-      defaultValue: app.Sequelize.NOW,
+    creator_id: {
+      type: INTEGER,
+      allowNull: false,
+      comment: '奖品创建者id',
+      references: {
+        model: app.model.User,
+        key: 'id',
+      },
     },
-    updated_at: {
-      type: DATE,
-      defaultValue: app.Sequelize.NOW,
-    },
-  }, { freezeTableName: true });
+  }, { freezeTableName: true, timestamps: true });
+  Prize.associate = function() {
+    app.model.Prize.belongsTo(app.model.User, {
+      foreignKey: 'creator_id',
+      as: 'creator',
+    });
+    app.model.Prize.hasMany(app.model.UserPrize, {
+      foreignKey: 'prize_id',
+      as: 'user_prizes',
+    });
+  };
+  return Prize;
 };

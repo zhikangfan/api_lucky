@@ -1,22 +1,19 @@
 const Service = require('egg').Service;
-
+const { v4: uuidv4 } = require('uuid');
 class InviteService extends Service {
-  async addInviteLink(options) {
-    return this.ctx.model.InviteLink.create(options);
+  async addInviteLink({ inviter,
+    type,
+    expires,
+  }) {
+    const key = uuidv4();
+    await this.app.redis.set(key, JSON.stringify({ inviter, type, status: false }), 'EX', expires);
+    return key;
   }
   async findInviteLink(id) {
-    return this.ctx.model.InviteLink.findOne({
-      where: {
-        id,
-      },
-    });
+    return await this.app.redis.get(id);
   }
   async dropInviteLink(id) {
-    return this.ctx.model.InviteLink.update({ status: false }, {
-      where: {
-        id,
-      },
-    });
+    await this.app.redis.del(id);
   }
 }
 module.exports = InviteService;
