@@ -99,7 +99,7 @@ class UserController extends Controller {
       const { ctx } = this;
       const uid = ctx.session.userId;
       const target = await ctx.service.user.findUser(uid);
-      if (!target || !target.uid) {
+      if (!target) {
         this.fail({
           code: 400,
           msg: '用户不存在',
@@ -204,6 +204,45 @@ class UserController extends Controller {
     } catch (e) {
       this.fail('解除绑定失败');
     }
+  }
+
+  async addCount() {
+      try {
+        const { ctx } = this;
+        const uid = ctx.session.userId;
+        const { inviter } = this.ctx.request.body;
+        const userInfo = await this.ctx.service.user.findUser(uid);
+        const origin = await ctx.service.user.findUser(inviter);
+        if (!origin) {
+          this.fail({
+            code: 400,
+            msg: '用户不存在',
+          });
+          return;
+        }
+        if (inviter === uid) {
+            this.fail({
+              code: 400,
+              msg: '自己无法添加抽奖次数',
+            });
+            return
+        }
+        if (userInfo.companion !== inviter) {
+            this.fail({
+                code: 400,
+                msg: '非绑定用户无法添加抽奖次数',
+            })
+            return
+        }
+
+        await ctx.service.user.updateUser(inviter, {
+            lottery_chances: origin.lottery_chances + 1
+        });
+        this.success();
+      } catch (e) {
+          console.log(e)
+        this.fail('添加失败');
+      }
   }
 }
 

@@ -7,6 +7,7 @@ module.exports = app => {
   router.post('/user/login', controller.user.login);
   router.get('/user/profile', app.middleware.auth(), app.middleware.auth(), controller.user.getProfile);
   router.post('/user/update', app.middleware.auth(), controller.user.updateProfile);
+  router.post('/user/addCount', app.middleware.auth(), controller.user.addCount);
   router.post('/user/logout', app.middleware.auth(), controller.user.logout);
   router.post('/user/register', controller.user.register);
   router.post('/user/bind', app.middleware.auth(), controller.user.bind);
