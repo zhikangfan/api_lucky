@@ -3,7 +3,7 @@ const { Controller } = require('egg');
 class PrizeController extends Controller {
   success(data) {
     this.ctx.body = {
-      status: 200,
+      code: 200,
       msg: 'success',
       data,
     };
@@ -11,7 +11,7 @@ class PrizeController extends Controller {
 
   fail(msg) {
     this.ctx.body = {
-      status: 500,
+      code: 500,
       msg,
     };
   }
@@ -20,7 +20,7 @@ class PrizeController extends Controller {
     const { service } = this;
     try {
       const data = await service.prize.getAll();
-      this.success(data.dataValues);
+      this.success(data);
     } catch (e) {
       this.fail('查询失败');
     }

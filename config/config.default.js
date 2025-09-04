@@ -22,6 +22,7 @@ module.exports = appInfo => {
     prizeDataPath: path.join(__dirname, '../data/prize.json'),
     historyDataPath: path.join(__dirname, '../data/history.json'),
     userDataPath: path.join(__dirname, '../data/user.json'),
+      preInvitationLink: 'http://192.168.31.11:5173'
   };
 
   config.security = {

@@ -17,4 +17,7 @@ module.exports = app => {
   router.post('/prize/add', controller.prize.add);
   router.post('/prize/update', controller.prize.update);
   router.post('/prize/remove', controller.prize.remove);
+  router.post('/invite/qrcode', app.middleware.auth(), controller.invite.generateInvitationLink);
+  router.post('/invite/writeOff', app.middleware.auth(), controller.invite.writeOff);
+  router.get('/invite/check', app.middleware.auth(), controller.invite.check);
 };

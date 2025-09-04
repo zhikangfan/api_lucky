@@ -4,7 +4,7 @@ const crypto = require('crypto');
 class UserController extends Controller {
   success(data) {
     this.ctx.body = {
-      status: 200,
+      code: 200,
       msg: 'success',
       data,
     };
@@ -12,7 +12,7 @@ class UserController extends Controller {
 
   fail({ code, msg }) {
     this.ctx.body = {
-      status: code || 500,
+      code: code || 500,
       msg,
     };
   }
@@ -36,7 +36,7 @@ class UserController extends Controller {
         .digest('hex');
       // 查找用户
       const user = await ctx.service.user.findUserByAccount(account);
-      if (!user || user.dataValues.password !== hashedPassword) {
+      if (!user || user.password !== hashedPassword) {
         this.fail({
           code: 400,
           msg: '账号或密码错误',
@@ -44,7 +44,7 @@ class UserController extends Controller {
         return;
       }
       // 设置session
-      ctx.session.userId = user.dataValues.id;
+      ctx.session.userId = user.id;
       const { password: pwd, ...info } = user.dataValues;
       this.success(info);
     } catch (e) {

@@ -28,7 +28,7 @@ module.exports = (options, app) => {
 
       // 验证用户是否存在且状态正常
       const user = await ctx.service.user.findUser(userId);
-      if (!user || !user.uid) {
+      if (!user) {
         ctx.body = {
           code: 401,
           message: '用户不存在或已被禁用',
@@ -39,6 +39,7 @@ module.exports = (options, app) => {
       ctx.state.user = user;
       await next();
     } catch (error) {
+        console.log(error,'--erro')
       ctx.body = {
         code: 401,
         message: '认证失败',

@@ -3,7 +3,7 @@ const { Controller } = require('egg');
 class HistoryController extends Controller {
   success(data) {
     this.ctx.body = {
-      status: 200,
+      code: 200,
       msg: 'success',
       data,
     };
@@ -11,7 +11,7 @@ class HistoryController extends Controller {
 
   fail({ code, msg }) {
     this.ctx.body = {
-      status: code || 500,
+      code: code || 500,
       msg,
     };
   }
