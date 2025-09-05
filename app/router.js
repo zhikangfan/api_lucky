@@ -10,6 +10,10 @@ module.exports = app => {
   router.post('/user/addCount', app.middleware.auth(), controller.user.addCount);
   router.post('/user/logout', app.middleware.auth(), controller.user.logout);
   router.post('/user/register', controller.user.register);
+  router.get('/user/bindQRCode', app.middleware.auth(), controller.user.generateBindQRCode);
+  router.get('/user/bindCheck', app.middleware.auth(), controller.user.bindCheck);
+  router.get('/user/addCountQRCode', app.middleware.auth(), controller.user.generateAddCountQRCode);
+  router.get('/user/addCountCheck', app.middleware.auth(), controller.user.addCountCheck);
   router.post('/user/bind', app.middleware.auth(), controller.user.bind);
   router.post('/user/unbind', app.middleware.auth(), controller.user.unbind);
   router.post('/user/remove', app.middleware.auth(), controller.user.remove);
@@ -20,7 +24,4 @@ module.exports = app => {
   router.post('/prize/add', app.middleware.auth(), controller.prize.add);
   router.post('/prize/update', app.middleware.auth(), controller.prize.update);
   router.post('/prize/remove', app.middleware.auth(), controller.prize.remove);
-  router.get('/invite/qrcode', app.middleware.auth(), controller.invite.generateInvitationLink);
-  router.post('/invite/writeOff', app.middleware.auth(), controller.invite.writeOff);
-  router.get('/invite/check', app.middleware.auth(), controller.invite.check);
 };

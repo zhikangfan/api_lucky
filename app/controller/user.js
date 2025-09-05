@@ -146,45 +146,99 @@ class UserController extends Controller {
     }
   }
 
+  async generateBindQRCode() {
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const type = 0; // 0: 绑定 1: 抽奖
+      const expires = 5 * 60;
+      const { key, link } = await this.ctx.service.invite.addInviteLink({
+        inviter: uid,
+        type,
+        expires,
+      });
+      this.success({
+        qid: key,
+        src: link,
+      });
+    } catch (e) {
+      this.fail({
+        msg: '生成失败',
+      });
+    }
+  }
+  async bindCheck() {
+    const { ctx } = this;
+    const { qid } = ctx.request.query;
+    if (!qid) {
+      this.fail({
+        code: 400,
+        msg: '请传入qid',
+      });
+    }
+    const res = await this.ctx.service.invite.findInviteLink(qid);
+    if (!res) {
+      this.fail({
+        code: 400,
+        msg: '该链接不存在或已过期',
+      });
+      return;
+    }
+    this.success(JSON.parse(res));
+  }
   async bind() {
     try {
       const { ctx } = this;
       const uid = ctx.session.userId;
-      const { bindUserId } = this.ctx.request.body;
+      const { qid, inviter } = ctx.request.body;
+      const target = await this.ctx.service.invite.findInviteLink(qid);
+      if (!target) {
+        this.fail({
+          msg: '该链接不存在或已过期',
+        });
+        return;
+      }
+
+      const user = await this.ctx.service.user.findUser(inviter);
+      if (!user) {
+        this.fail({
+          msg: '该用户不存在',
+        });
+        return;
+      }
+      const parseTarget = JSON.parse(target);
+      if (parseTarget?.type !== 0) {
+        this.fail({
+          msg: '无效链接',
+        });
+        return;
+      }
       const origin = await ctx.service.user.findUser(uid);
-      if (origin.companion) {
+
+      if (origin.companion || user.companion) {
         this.fail({
           code: 400,
           msg: '账号已绑定其它账号',
         });
         return;
       }
-      const target = await ctx.service.user.findUser(bindUserId);
-      if (!target) {
+      if (origin.companion === inviter) {
         this.fail({
           code: 400,
-          msg: '用户不存在',
+          msg: '不能绑定自己账号',
         });
         return;
       }
-      if (target.companion) {
-        this.fail({
-          code: 400,
-          msg: '该用户已被绑定',
-        });
-        return;
-      }
-      if (uid === bindUserId) {
-        this.fail({
-          code: 400,
-          msg: '无法绑定自己账号',
-        });
-        return;
-      }
-      await ctx.service.user.bindUser(uid, bindUserId);
+      await ctx.service.user.bindUser(uid, inviter);
+      const r = JSON.parse(target);
+      r.status = true;
+      // 更新redis状态，并重新设置过期时间
+      await this.ctx.service.invite.updateInviteLink(qid, JSON.stringify(r), 60);
       this.success();
     } catch (e) {
-      this.fail('绑定失败');
+      this.fail({
+        msg: '核销失败',
+      });
     }
   }
   async unbind() {
@@ -206,43 +260,102 @@ class UserController extends Controller {
     }
   }
 
-  async addCount() {
-      try {
-        const { ctx } = this;
-        const uid = ctx.session.userId;
-        const { inviter } = this.ctx.request.body;
-        const userInfo = await this.ctx.service.user.findUser(uid);
-        const origin = await ctx.service.user.findUser(inviter);
-        if (!origin) {
-          this.fail({
-            code: 400,
-            msg: '用户不存在',
-          });
-          return;
-        }
-        if (inviter === uid) {
-            this.fail({
-              code: 400,
-              msg: '自己无法添加抽奖次数',
-            });
-            return
-        }
-        if (userInfo.companion !== inviter) {
-            this.fail({
-                code: 400,
-                msg: '非绑定用户无法添加抽奖次数',
-            })
-            return
-        }
+  async generateAddCountQRCode() {
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const type = 1; // 0: 绑定 1: 抽奖
+      const expires = 5 * 60;
+      const { key, link } = await this.ctx.service.invite.addInviteLink({
+        inviter: uid,
+        type,
+        expires,
+      });
+      this.success({
+        qid: key,
+        src: link,
+      });
+    } catch (e) {
+      this.fail({
+        msg: '生成失败',
+      });
+    }
+  }
 
-        await ctx.service.user.updateUser(inviter, {
-            lottery_chances: origin.lottery_chances + 1
+  async addCountCheck() {
+    const { ctx } = this;
+    const { qid } = ctx.request.query;
+    if (!qid) {
+      this.fail({
+        code: 400,
+        msg: '请传入qid',
+      });
+    }
+    const res = await this.ctx.service.invite.findInviteLink(qid);
+    if (!res) {
+      this.fail({
+        code: 400,
+        msg: '该链接不存在或已过期',
+      });
+      return;
+    }
+    this.success(JSON.parse(res));
+  }
+  async addCount() {
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const { qid } = this.ctx.request.body;
+      const target = await this.ctx.service.invite.findInviteLink(qid);
+      if (!target) {
+        this.fail({
+          msg: '该链接不存在或已过期',
         });
-        this.success();
-      } catch (e) {
-          console.log(e)
-        this.fail('添加失败');
+        return;
       }
+      const r = JSON.parse(target);
+      if (r.status) {
+        this.fail({
+          msg: '该链接不存在或已过期',
+        });
+        return;
+      }
+      const origin = await ctx.service.user.findUser(r.inviter);
+      if (!origin) {
+        this.fail({
+          code: 400,
+          msg: '用户不存在',
+        });
+        return;
+      }
+      if (r.inviter === uid) {
+        this.fail({
+          code: 400,
+          msg: '自己无法添加抽奖次数',
+        });
+        return;
+      }
+
+      const userInfo = await this.ctx.service.user.findUser(uid);
+      if (userInfo.companion !== r.inviter) {
+        this.fail({
+          code: 400,
+          msg: '非绑定用户无法添加抽奖次数',
+        });
+        return;
+      }
+
+      await ctx.service.user.updateUser(r.inviter, {
+        lottery_chances: origin.lottery_chances + 1,
+      });
+      r.status = true;
+      // 更新redis状态，并重新设置过期时间
+      await this.ctx.service.invite.updateInviteLink(qid, r, 60);
+      this.success();
+    } catch (e) {
+      console.log(e);
+      this.fail('添加失败');
+    }
   }
 }
 
