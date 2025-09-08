@@ -17,6 +17,8 @@ module.exports = app => {
   router.post('/user/bind', app.middleware.auth(), controller.user.bind);
   router.post('/user/unbind', app.middleware.auth(), controller.user.unbind);
   router.post('/user/remove', app.middleware.auth(), controller.user.remove);
+
+  router.get('/user/qid', app.middleware.auth(), controller.user.findUserByQid);
   router.get('/history/list', app.middleware.auth(), controller.history.getHistoryList);
   router.post('/history/add', app.middleware.auth(), controller.history.addHistory);
   router.post('/history/update', app.middleware.auth(), controller.history.updateHistory);
