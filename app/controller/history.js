@@ -48,28 +48,102 @@ class HistoryController extends Controller {
       });
     }
   }
-  async updateHistory() {
+
+  async generateWriteOffQRCode() {
     try {
       const { ctx } = this;
       const uid = ctx.session.userId;
-      const { hid } = ctx.request.body;
-      const target = await ctx.service.history.findHistory(hid);
+      const { hid } = ctx.request.query;
+      const type = 2; // 0: 绑定 1: 抽奖 2:核销中奖卡片
+      const expires = 5 * 60;
+      const target = await this.ctx.service.history.findHistory(hid);
       if (!target) {
+        this.fail({
+          msg: '该奖励不存在',
+        });
+        return;
+      }
+      const { key, link } = await this.ctx.service.invite.addInviteLink({
+        inviter: uid,
+        hid,
+        prizeName: target?.prize?.name,
+        type,
+        expires,
+      });
+      this.success({
+        qid: key,
+        src: link,
+      });
+    } catch (e) {
+      this.fail({
+        msg: '生成失败',
+      });
+    }
+  }
+
+  async writeOffCheck() {
+    const { ctx } = this;
+    const { qid } = ctx.request.query;
+    if (!qid) {
+      this.fail({
+        code: 400,
+        msg: '请传入qid',
+      });
+    }
+    const res = await this.ctx.service.invite.findInviteLink(qid);
+    if (!res) {
+      this.fail({
+        code: 400,
+        msg: '该链接不存在或已过期',
+      });
+      return;
+    }
+    this.success(JSON.parse(res));
+  }
+  async writeOffHistory() {
+    try {
+      const { ctx } = this;
+      const uid = ctx.session.userId;
+      const { qid, inviter } = ctx.request.body;
+      const target = await this.ctx.service.invite.findInviteLink(qid);
+      if (!target) {
+        this.fail({
+          msg: '该链接不存在或已过期',
+        });
+        return;
+      }
+
+      const user = await this.ctx.service.user.findUser(inviter);
+      if (!user) {
+        this.fail({
+          msg: '该用户不存在',
+        });
+        return;
+      }
+      const parseTarget = JSON.parse(target);
+      if (parseTarget?.type !== 2) {
+        this.fail({
+          msg: '无效链接',
+        });
+        return;
+      }
+      const targetHistory = await ctx.service.history.findHistory(parseTarget.hid);
+      if (!targetHistory) {
         this.fail({
           code: 400,
           msg: '无效卡',
         });
         return;
       }
-      if (target.write_off) {
+      if (targetHistory.write_off) {
         this.fail({
           code: 400,
           msg: '已核销',
         });
         return;
       }
-      const userInfo = await ctx.service.user.findUser(uid);
-      if (userInfo.id === target.user_id) {
+      const origin = await ctx.service.user.findUser(uid);
+      if (origin.id === inviter) {
         this.fail({
           code: 400,
           msg: '自己无法核销',
@@ -77,21 +151,28 @@ class HistoryController extends Controller {
         return;
       }
       // 如果核销者与绑定人有关系，则可以核销
-      if (userInfo.companion !== target.user_id) {
+      if (origin.companion !== user.companion) {
         this.fail({
           code: 400,
           msg: '非绑定关系无法核销',
         });
         return;
       }
-      await ctx.service.history.updateHistory(hid, {
+      await ctx.service.history.updateHistory(parseTarget.hid, {
         write_off: true,
       });
+      const r = JSON.parse(target);
+      r.status = true;
+      // 更新redis状态，并重新设置过期时间
+      await this.ctx.service.invite.updateInviteLink(qid, JSON.stringify(r), 60);
       this.success();
     } catch (e) {
-      this.fail('核销失败');
+      this.fail({
+        msg: '核销失败',
+      });
     }
   }
+
 }
 
 module.exports = HistoryController;

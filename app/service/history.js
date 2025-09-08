@@ -35,6 +35,12 @@ class HistoryService extends Service {
       where: {
         id: hid,
       },
+      include: [
+        {
+          model: this.ctx.model.Prize,
+          as: 'prize',
+        },
+      ],
     });
   }
 }

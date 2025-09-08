@@ -21,7 +21,10 @@ module.exports = app => {
   router.get('/user/qid', app.middleware.auth(), controller.user.findUserByQid);
   router.get('/history/list', app.middleware.auth(), controller.history.getHistoryList);
   router.post('/history/add', app.middleware.auth(), controller.history.addHistory);
-  router.post('/history/update', app.middleware.auth(), controller.history.updateHistory);
+
+  router.get('/history/writeOffQRCode', app.middleware.auth(), controller.history.generateWriteOffQRCode);
+  router.get('/history/writeOffCheck', app.middleware.auth(), controller.history.writeOffCheck);
+  router.post('/history/writeOff', app.middleware.auth(), controller.history.writeOffHistory);
   router.get('/prize/list', app.middleware.auth(), controller.prize.getList);
   router.post('/prize/add', app.middleware.auth(), controller.prize.add);
   router.post('/prize/update', app.middleware.auth(), controller.prize.update);

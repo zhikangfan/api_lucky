@@ -152,6 +152,14 @@ class UserController extends Controller {
       const uid = ctx.session.userId;
       const type = 0; // 0: 绑定 1: 抽奖
       const expires = 5 * 60;
+      const user = await this.ctx.service.user.findUser(uid);
+      if (user.companion) {
+        this.fail({
+          code: 400,
+          msg: '账号已绑定其它账号',
+        });
+        return;
+      }
       const { key, link } = await this.ctx.service.invite.addInviteLink({
         inviter: uid,
         type,

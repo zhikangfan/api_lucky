@@ -4,9 +4,10 @@ class InviteService extends Service {
   async addInviteLink({ inviter,
     type,
     expires,
+    ...others
   }) {
     const key = uuidv4();
-    await this.app.redis.set(key, JSON.stringify({ inviter, type, status: false }), 'EX', expires);
+    await this.app.redis.set(key, JSON.stringify({ inviter, type, status: false, ...others }), 'EX', expires);
     const link = `${this.ctx.app.config.preInvitationLink}?qid=${key}&type=${type}`;
     return {
       key,
