@@ -63,6 +63,12 @@ class HistoryController extends Controller {
         });
         return;
       }
+      if (target.write_off) {
+        this.fail({
+          msg: '该奖励已核销',
+        });
+        return;
+      }
       const { key, link } = await this.ctx.service.invite.addInviteLink({
         inviter: uid,
         hid,
@@ -104,7 +110,7 @@ class HistoryController extends Controller {
     try {
       const { ctx } = this;
       const uid = ctx.session.userId;
-      const { qid, inviter } = ctx.request.body;
+      const { qid } = ctx.request.body;
       const target = await this.ctx.service.invite.findInviteLink(qid);
       if (!target) {
         this.fail({
@@ -113,14 +119,14 @@ class HistoryController extends Controller {
         return;
       }
 
-      const user = await this.ctx.service.user.findUser(inviter);
+      const parseTarget = JSON.parse(target);
+      const user = await this.ctx.service.user.findUser(parseTarget?.inviter);
       if (!user) {
         this.fail({
           msg: '该用户不存在',
         });
         return;
       }
-      const parseTarget = JSON.parse(target);
       if (parseTarget?.type !== 2) {
         this.fail({
           msg: '无效链接',
@@ -143,7 +149,7 @@ class HistoryController extends Controller {
         return;
       }
       const origin = await ctx.service.user.findUser(uid);
-      if (origin.id === inviter) {
+      if (origin.id === parseTarget?.inviter) {
         this.fail({
           code: 400,
           msg: '自己无法核销',
@@ -151,7 +157,7 @@ class HistoryController extends Controller {
         return;
       }
       // 如果核销者与绑定人有关系，则可以核销
-      if (origin.companion !== user.companion) {
+      if (origin.companion !== parseTarget?.inviter) {
         this.fail({
           code: 400,
           msg: '非绑定关系无法核销',
@@ -161,10 +167,9 @@ class HistoryController extends Controller {
       await ctx.service.history.updateHistory(parseTarget.hid, {
         write_off: true,
       });
-      const r = JSON.parse(target);
-      r.status = true;
+      parseTarget.status = true;
       // 更新redis状态，并重新设置过期时间
-      await this.ctx.service.invite.updateInviteLink(qid, JSON.stringify(r), 60);
+      await this.ctx.service.invite.updateInviteLink(qid, parseTarget, 60);
       this.success();
     } catch (e) {
       this.fail({
