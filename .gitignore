@@ -14,3 +14,4 @@ run/
 typings/
 .nyc_output/
 .vscode/
+lucky_server.tar.gz
