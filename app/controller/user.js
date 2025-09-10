@@ -192,6 +192,22 @@ class UserController extends Controller {
       });
       return;
     }
+    const parseTarget = JSON.parse(res);
+    if (parseTarget?.status) {
+      this.fail({
+        code: 400,
+        msg: '该链接已被使用',
+      });
+      return;
+    }
+    const uid = ctx.session.userId;
+    if (uid === parseTarget.inviter) {
+      this.fail({
+        code: 400,
+        msg: '不允许访问自己生成的链接',
+      });
+      return;
+    }
     this.success(JSON.parse(res));
   }
   async bind() {
@@ -303,6 +319,22 @@ class UserController extends Controller {
       this.fail({
         code: 400,
         msg: '该链接不存在或已过期',
+      });
+      return;
+    }
+    const parseTarget = JSON.parse(res);
+    if (parseTarget?.status) {
+      this.fail({
+        code: 400,
+        msg: '该链接已被使用',
+      });
+      return;
+    }
+    const uid = ctx.session.userId;
+    if (uid === parseTarget.inviter) {
+      this.fail({
+        code: 400,
+        msg: '不允许访问自己生成的链接',
       });
       return;
     }
