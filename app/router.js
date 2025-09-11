@@ -29,4 +29,5 @@ module.exports = app => {
   router.post('/prize/add', app.middleware.auth(), controller.prize.add);
   router.post('/prize/update', app.middleware.auth(), controller.prize.update);
   router.post('/prize/remove', app.middleware.auth(), controller.prize.remove);
+  router.get('/health', controller.health.index);
 };
