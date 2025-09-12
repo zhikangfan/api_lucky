@@ -43,9 +43,10 @@ module.exports = appInfo => {
   // Session配置
   config.session = {
     key: 'LUCKY_SESS',
-    maxAge: 24 * 3600 * 1000, // 24小时
+    maxAge: 7 * 24 * 3600 * 1000, // 7*24小时
     httpOnly: true,
     encrypt: true,
+    renew: true, // 自动刷新session
   };
   config.redis = {
     client: {
