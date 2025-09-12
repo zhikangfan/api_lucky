@@ -112,14 +112,6 @@ class HistoryController extends Controller {
       });
       return;
     }
-    const uid = ctx.session.userId;
-    if (uid === parseTarget.inviter) {
-      this.fail({
-        code: 400,
-        msg: '不允许访问自己生成的链接',
-      });
-      return;
-    }
     this.success(JSON.parse(res));
   }
   async writeOffHistory() {
